@@ -12,11 +12,12 @@ show_message = function (message, hide) {
 },
 validate = function () {
     var token = localStorage.token || '',
-        userkey = localStorage.userkey || '';
+        userkey = localStorage.userkey || '',
         device = localStorage.device || '';
 
-        if(device==='(all devices)'||device.split(',').length>1)
-            device=''
+    if (device === '(all devices)' || device.split(',').length > 1) {
+        device = '';
+    }
     if (!userkey || !token) {
         show_message('Please fill both fields!');
         return;
@@ -35,12 +36,16 @@ validate = function () {
         if (req.readyState === 4) {
             if (req.status === 200) {
                 localStorage.valid = token + userkey;
-                if(device===''){
-                    show_message('OK, seems legit! Pushing to '+ JSON.parse(req.responseText).devices, 3);
-                    localStorage.device=JSON.parse(req.responseText).devices;
-                }
-                else
+                if (device === '') {
+                    show_message('OK, seems legit! Pushing to ' + JSON.parse(req.responseText).devices, 3);
+                    localStorage.device = JSON.parse(req.responseText).devices;
+                } else {
                     show_message('OK, seems legit! Pushing to ' + device, 3);
+                }
+                chrome.runtime.sendMessage({
+                    action: 'reload_contextMenus'
+                });
+
             } else {
                 localStorage.valid = '';
                 show_message('Something is fishy: ' + req.responseText);
